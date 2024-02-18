@@ -1,8 +1,3 @@
-<script setup>
-import axios from 'axios';
-console.log(axios);
-</script>
-
 <template>
   <form class="max-w-sm mx-auto">
     <div class="mb-5">

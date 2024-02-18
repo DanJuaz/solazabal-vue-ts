@@ -4,12 +4,7 @@ import HomeMap from '@components/HomeMap.vue'
 </script>
 <template>
   <div class="w-full h-full flex flex-row">
-    <header class="">
-      <Navbar/>
-    </header>
-    <main class="w-full h-screen flex flex-col justify-center items-center">
-      <HomeMap />
-    </main>
+alumnos individual
   </div>
 </template>
 
