@@ -3,11 +3,10 @@ import Navbar from '@components/Navbar.vue'
 import HomeMap from '@components/HomeMap.vue'
 </script>
 <template>
-  <div class="w-full h-full flex flex-row">
+  <div class="w-screen h-full flex flex-row">
     <header class="">
-      <Navbar/>
     </header>
-    <main class="w-full h-screen flex flex-col justify-center items-center">
+    <main class="w-screen h-screen flex flex-col justify-center items-center">
       <HomeMap />
     </main>
   </div>

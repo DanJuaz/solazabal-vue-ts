@@ -73,7 +73,7 @@
                   <p class="text-gray-900 whitespace-no-wrap">{{ student.town.name }}</p>
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                  <p class="text-gray-900 whitespace-no-wrap">{{ student.examination.date }} ({{ student.examination.id }})</p>
+                  <!-- <p class="text-gray-900 whitespace-no-wrap">{{ student.examination.date }} ({{ student.examination.id }})</p> -->
                 </td>
               </tr>
             </tbody>
