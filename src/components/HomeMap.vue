@@ -1,16 +1,22 @@
 <template>
+  <span
+    @click="findLocation"
+    class="absolute top-20 left-4 z-[1000] px-2 py-1 border border-black bg-white hover:cursor-pointer"
+  >
+    <font-awesome-icon icon="location" />
+  </span>
   <div class="flex flex-row w-full">
     <div id="mapContainer" class="w-[1000px] h-screen" />
     <div class="w-1/3 h-full bg-gray-500">
       <form
         @submit.prevent="startJourney"
-        class="w-[100px] absolute top-4 left-20 z-[1000] flex flex-col sm:flex-col md:flex-col"
+        class="w-auto absolute top-4 left-20 z-[1000] flex flex-col sm:flex-col md:flex-col"
       >
         <div>
           <select
             v-for="student in students_by_teacher"
             :key="student.id"
-            class="w-[150px] bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            class="w-auto bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           >
             <option>{{ student.name }}</option>
           </select>
@@ -19,7 +25,7 @@
           type="submit"
           @click="startJourney"
           id="startJourney"
-          class="w-10 h-10 rounded-md px-2 py-1 mx-1 my-1 bg-green font-semibold"
+          class="w-auto h-10 rounded-md px-0 py-1 mx-1 my-1 bg-green font-semibold"
         >
           Iniciar
         </button>
@@ -28,14 +34,15 @@
           <button class="rounded-md px-2 py-1 mx-1 my-1 bg-orange-500 font-semibold">
             <font-awesome-icon icon="pause" />
           </button>
+          <button
+            class="rounded-md px-2 py-1 mx-1 my-1 bg-orange-500 font-semibold"
+            @click="stopJourney"
+          >
+            Stop
+          </button>
         </div>
       </form>
-      <button
-        class="rounded-md px-2 py-1 mx-1 my-1 bg-orange-500 font-semibold"
-        @click="stopJourney"
-      >
-        Stop
-      </button>
+
       <details class="rounded-md shadow-md p-4" v-for="type_foul in type_fouls" :key="type_foul.id">
         <summary
           class="cursor-pointer bg-gray-200 hover:bg-gray-300 py-2 px-4 rounded-md outline-none"
@@ -59,11 +66,12 @@
 </template>
 
 <script>
-import { defineComponent, onMounted, onBeforeMount, ref } from 'vue';
+import { defineComponent, onMounted, onBeforeMount, ref } from 'vue'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import router from '@/router'
 import axios from 'axios'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 export default defineComponent({
   data() {
@@ -137,12 +145,14 @@ export default defineComponent({
       default: () => []
     }
   },
-  setup(props) {
+  setup() {
     let map = null
     let route = []
     let routerLayer
-    let showPauseButton = ref(false);
+    let showPauseButton = ref(false)
     let watchId
+    let userMarker
+    let userMarkerAround
 
     onMounted(() => {
       createMapLayer()
@@ -158,9 +168,7 @@ export default defineComponent({
       map = L.map('mapContainer', {
         center: [0, 0],
         zoom: 13
-      }).setView([0, 0], 22);
-      let userMarker;
-      let userMarkerAround;
+      }).setView([0, 0], 22)
 
       try {
         // Create a marker for the user's current position
@@ -213,13 +221,13 @@ export default defineComponent({
         Satellite: satelliteLayer
       }
       // Add layer control to the map
-      L.control.layers(baseLayers).addTo(map);
-      
+      L.control.layers(baseLayers).addTo(map)
+
       return { map, userMarker, userMarkerAround }
     }
 
     // Show pause botton
-    const startJourney = ({ map, userMarker, userMarkerAround }) => {
+    const startJourney = () => {
       // Verificar si el navegador es compatible con la API Screen Wake Lock
       if ('wakeLock' in navigator) {
         // Solicitar el bloqueo de pantalla activo
@@ -238,7 +246,7 @@ export default defineComponent({
 
                   // Update the marker position
                   userMarker.setLatLng([latitude, longitude])
-                  userMarketAround.setLatLng([latitude, longitude])
+                  userMarkerAround.setLatLng([latitude, longitude])
 
                   // Center the map on the marker
                   map.panTo([latitude, longitude])
@@ -282,13 +290,10 @@ export default defineComponent({
     }
 
     const stopJourney = () => {
-      console.log('Detener')
+      // Detener el seguimiento continuo
       try {
-        // Detener el seguimiento continuo
         navigator.geolocation.clearWatch(watchId)
-
         route = []
-
         if (routeLayer) {
           map.removeLayer(routeLayer)
           routeLayer = undefined
@@ -297,9 +302,25 @@ export default defineComponent({
         console.log(`Error al detener el seguimiento: ${error.message}`)
       }
     }
+
+    const findLocation = () => {
+      console.log('Find location')
+      console.log(userMarker)
+      console.log(userMarkerAround)
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          const { latitude, longitude } = position.coords
+          map.setView([latitude, longitude], 20, { animate: true, duration: 0.1 })
+        })
+      } else {
+        alert('Geolocation is not supported by this browser.')
+      }
+    }
+    // Return the function to be used in the template
     return {
       startJourney,
-      stopJourney
+      stopJourney,
+      findLocation
     }
   }
 })
