@@ -1,7 +1,7 @@
 <template>
   <span
     @click="findLocation"
-    class="absolute top-20 left-4 z-[1000] px-2 py-1 border border-black bg-white hover:cursor-pointer"
+    class="absolute top-20 left-4 z-[1000] px-2 py-1 border border-[#B3B2B2] bg-white hover:cursor-pointer"
   >
     <font-awesome-icon icon="location" />
   </span>
@@ -91,10 +91,7 @@ export default defineComponent({
         teacher: null,
         student: null,
         faults: []
-      },
-
-      // Show pause button
-      showPauseButton: false
+      }
     }
   },
   mounted() {
@@ -105,7 +102,7 @@ export default defineComponent({
     // Fetch
     async fetch_type_foul() {
       axios
-        .get('type_foul/?format=json')
+        .get('type_foul/')
         .then((response) => {
           this.type_fouls = response.data
           //console.log(this.type_fouls)
@@ -228,21 +225,19 @@ export default defineComponent({
 
     // Show pause botton
     const startJourney = () => {
-      // Verificar si el navegador es compatible con la API Screen Wake Lock
+      // API Screen Wake Lock
       if ('wakeLock' in navigator) {
-        // Solicitar el bloqueo de pantalla activo
         navigator.wakeLock
           .request('screen')
           .then((wakeLockObj) => {
-            console.log('Bloqueo de pantalla activado')
-
+            //console.log('Bloqueo de pantalla activado')
             showPauseButton.value = true
-
             try {
               watchId = navigator.geolocation.watchPosition(
                 (position) => {
+                  const date = new Date()
                   const { latitude, longitude } = position.coords
-                  route.push([latitude, longitude])
+                  route.push([latitude, longitude], date)
 
                   // Update the marker position
                   userMarker.setLatLng([latitude, longitude])
@@ -252,6 +247,7 @@ export default defineComponent({
                   map.panTo([latitude, longitude])
 
                   drawRoute()
+                  console.log(route)
                 },
                 (error) => {
                   console.log(`Error durante el seguimiento: ${error.message}`)
@@ -276,17 +272,20 @@ export default defineComponent({
 
     const drawRoute = () => {
       if (route.length > 1) {
-        if (!routeLayer) {
-          routeLayer = L.polyline(route, { width: '5px', color: '#E1DFFF' }).addTo(map)
+        if (!routerLayer) {
+          let routerLayer = L.polyline(route, { width: '5px', color: '#E1DFFF' }).addTo(map)
         } else {
-          routeLayer.setLatLngs(route)
+          routerLayer.setLatLngs(route)
+        }
+        // Corrected variable name from routerLayer to routeLayer
+        if (routerLayer) {
+          routerLayer.setStyle({
+            color: 'blue',
+            weight: 5,
+            opacity: 0.8
+          })
         }
       }
-      routerLayer.setStyle({
-        color: 'blue',
-        weight: 5,
-        opacity: 0.8
-      })
     }
 
     const stopJourney = () => {
@@ -304,17 +303,10 @@ export default defineComponent({
     }
 
     const findLocation = () => {
-      console.log('Find location')
-      console.log(userMarker)
-      console.log(userMarkerAround)
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((position) => {
-          const { latitude, longitude } = position.coords
-          map.setView([latitude, longitude], 20, { animate: true, duration: 0.1 })
-        })
-      } else {
-        alert('Geolocation is not supported by this browser.')
-      }
+      map.setView([userMarker._latlng.lat, userMarker._latlng.lng], 20, {
+        animate: true,
+        duration: 0.1
+      })
     }
     // Return the function to be used in the template
     return {
