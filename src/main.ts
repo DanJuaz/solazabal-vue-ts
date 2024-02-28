@@ -6,6 +6,7 @@ import { createPinia } from 'pinia'
 
 import App from '@src/App.vue'
 import router from './router'
+import VueCookies  from 'vue-cookies'
 
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { library } from '@fortawesome/fontawesome-svg-core'
@@ -20,6 +21,7 @@ const app = createApp(App)
 app.component('font-awesome-icon', FontAwesomeIcon)
 app.use(createPinia())
 app.use(router)
+app.use(VueCookies, { expires: '12m' })
 
 app.mount('#app')
 
