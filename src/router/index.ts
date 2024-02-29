@@ -1,7 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '@views/LoginView.vue'
-import VueCookies from 'vue-cookies'
-import { useCookies } from 'vue-cookies';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -69,26 +67,37 @@ const router = createRouter({
     }
   ]
 })
+
 router.beforeEach((to, from, next) => {
-  const requiresAuth = to.meta.requiresAuth
+  const requiresAuth = to.meta.requiresAuth;
 
-  // Ahora puedes usar $cookies en tu guardia de navegación
-  const isLoggedIn = true;
+  // Obtén el token del almacenamiento local
+  const token = localStorage.getItem('token');
 
-  // Check if the route requires authentication
+  // Verifica si el usuario está autenticado
+  const isLoggedIn = token !== null;
+
+  // Verifica si la ruta requiere autenticación
   if (requiresAuth) {
-    // If user is not logged in
+    // Si el usuario no está autenticado, redirige al inicio de sesión
     if (!isLoggedIn) {
-        return next({ path: '/login' })
-    }
-    // If user is logged in
-    else {
-      return next()
+      return next({ path: '/' });
     }
   }
 
+  // Si el usuario está autenticado y trata de acceder a la página de inicio de sesión, redirígelo a la página de inicio
+  if (to.name === 'login' && isLoggedIn) {
+    return next({ path: '/home' });
+  }
 
-  next()
-})
+  // Si el usuario intenta acceder a la página de inicio de sesión sin necesidad de autenticación y ya está autenticado, redirígelo a la página de inicio
+  if (to.name !== 'login' && !requiresAuth && isLoggedIn) {
+    return next({ path: '/home' });
+  }
+
+  // Continuar con la navegación normalmente
+  next();
+});
+
 
 export default router

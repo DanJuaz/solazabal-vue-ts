@@ -52,13 +52,12 @@ export default {
       console.log(this.loginForm)
       axios.post(`login/`, this.loginForm).then(
         (response) => {
-          $cookies.remove('token', 'csrftoken', 'remember_token')
-          // console.log(response.data)
-          $cookies.set('id', response.data.id)
-          $cookies.set('username', response.data.username)
-          $cookies.set('email', response.data.email)
-          $cookies.set('token', response.data.token);
-          router.push({ name: 'Home' })
+          console.log(response.data)
+          localStorage.removeItem('token')
+          localStorage.setItem('token', response.data.token);
+          console.log(`Succes:`,localStorage.getItem('token'))
+          router.push({ name: 'home' })
+          console.log(router.push({ name: 'home' }));
         },
         (error) => {
           console.log(error)
