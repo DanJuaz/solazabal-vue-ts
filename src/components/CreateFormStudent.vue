@@ -1,19 +1,23 @@
 <script>
 import axios from 'axios'
+import router from '@/router'
 export default {
   data() {
     return {
       towns: [],
       studentForm: {
+        img: '',
         DNI: '',
-        first_name: '',
-        last_name: '',
+        name: '',
+        surname: '',
         email: '',
         telephone: '',
         fecha_nacimiento: '',
         fecha_matriculacion: '',
-        town: '',
-        examination: ''
+        town: {
+          name: ''
+        },
+        teacher: localStorage.getItem('id')
       }
     }
   },
@@ -21,12 +25,13 @@ export default {
     this.fetchTowns()
   },
   methods: {
-    async createStudent() {
-      try {
-        const response = await axios.post('student/', this.studentForm)
-        console.log(response)
-      } catch (error) {
-        console.error('Error creating student:', error)
+    handleFileUpload(event) {
+      const fileInput = event.target
+      const file = fileInput.files[0]
+      const filePath = fileInput.value // Obtener la ruta del archivo seleccionado desde el campo de entrada
+      this.studentForm.img = {
+        file: file,
+        path: filePath
       }
     },
     async fetchTowns() {
@@ -36,47 +41,70 @@ export default {
       } catch (error) {
         console.error('Error fetching towns:', error)
       }
+    },
+    async insert_student() {
+      try {
+
+        console.log(this.studentForm)
+        const response = await axios.post('student/', this.studentForm, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        })
+        router.push({ name: 'students' })
+        console.log(response)
+      } catch (error) {
+        console.error('Error creating student:', error)
+        console.log(error.request)
+      }
     }
   }
 }
 </script>
 
 <template>
-  <form class="max-w-md mx-2 flex flex-col items-center">
-    <div class="w-full mb-4 flex flex-row sm:justify-center">
+  <form class="w-auto mx-4 flex flex-col md:flex-col items-center">
+    <h2 class="w-auto mr-4 font-medium">Nuevo Alumno: {{ studentForm.name }}</h2>
+    <input
+      type="file"
+      class="w-auto bg-gray-100 mr-4 font-medium rounded-md border-2"
+      @change="handleFileUpload"
+      accept="image/*"
+      required
+    />
+    <div class="w-full mb-4 flex flex-row md:flex-col justify-center">
       <label class="block text-gray-700 text-sm font-bold mb-2">
         DNI:
         <input
           type="text"
-          class="w-auto bg-gray-100 mr-4 rounded-md border-2"
+          class="w-auto bg-gray-100 mr-4 font-medium rounded-md border-2"
           v-model="studentForm.DNI"
           required
         />
       </label>
       <label class="block text-gray-700 text-sm font-bold mb-2">
         Municipio:
-        <select class="bg-gray-100 rounded-md border-2">
-          <option v-for="town in towns" :key="town.id" :selected="studentForm.town">
-            {{ town.name }}
-          </option>
+        <select v-model="studentForm.town.name" class="bg-gray-100 font-medium rounded-md border-2">
+          <option value="">Select Town</option>
+          <option v-for="town in towns" :key="town.id" :value="town.name">{{ town.name }}</option>
         </select>
       </label>
     </div>
     <!--Nombre y Apellido-->
-    <div class="w-full mb-4 md:space-y-0 md:space-x-4">
+    <div class="w-full mb-4">
       <label class="block text-gray-700 text-sm font-bold mb-2">Nombre y Apellidos: </label>
-      <div class="flex flex-row md:space-x-1">
+      <div class="w-full flex flex-row justify-between">
         <input
           type="text"
-          class="w-1/2 mr-2 rounded-md border-2 bg-gray-100"
+          class="w-1/2 mr-1 rounded-md border-2 font-medium bg-gray-100"
+          v-model="studentForm.name"
           required
-          v-model="studentForm.first_name"
         />
         <input
           type="text"
-          class="w-1/2 bg-gray-100 rounded-md border-2"
+          class="w-1/2 bg-gray-100 ml-1 rounded-md font-medium border-2"
+          v-model="studentForm.surname"
           required
-          v-model="studentForm.last_name"
         />
       </div>
     </div>
@@ -86,49 +114,46 @@ export default {
         Email:
         <input
           type="email"
-          class="w-full bg-gray-100 rounded-md py-1 border-2"
+          class="w-full bg-gray-100 rounded-md py-1 font-medium border-2"
           v-model="studentForm.email"
           required
         />
       </label>
-      <label class="block text-gray-700 text-sm font-bold mb-2">
+      <label class="block text-gray-700 text-sm my-4 font-bold mb-2">
         Teléfono:
         <input
           type="tel"
+          class="w-auto bg-gray-100 rounded-md font-medium border-2"
           v-model="studentForm.telephone"
-          class="w-auto bg-gray-100 rounded-md border-2"
         />
       </label>
     </div>
+    <!--Fechas-->
     <div class="w-full mb-4">
       <label class="block text-gray-700 text-sm font-bold mb-2">
         Fecha Nacimiento:
         <input
           type="date"
-          class="w-auto bg-gray-100 rounded-md border-2"
+          class="w-auto bg-gray-100 rounded-md font-medium border-2"
           v-model="studentForm.fecha_nacimiento"
           required
         />
       </label>
-      <label
-        >Fecha de Matriculacionn:
-        <input type="date" v-model="studentForm.fecha_matriculacion" />
-      </label>
-    </div>
-    <div class="w-full mb-4">
-      <label class="flex flex-col text-gray-700 text-sm font-bold mb-2">
-        Fecha Última Examinación:
+      <label class="block text-gray-700 text-sm font-bold mb-2"
+        >Fecha de Matriculación:
         <input
-          type="text"
-          class="w-auto bg-gray-100 rounded-md border-2"
-          v-model="studentForm.examination"
+          class="w-auto bg-gray-100 rounded-md font-medium border-2"
+          type="date"
+          v-model="studentForm.fecha_matriculacion"
         />
       </label>
     </div>
+    <!--Botonones-->
 
     <button
+      @click.prevent="insert_student()"
       type="submit"
-      class="button bg-green-500 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+      class="button bg-primary hover:bg-secondary focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
     >
       <font-awesome-icon icon="check" class="mr-2 text-white" />
     </button>

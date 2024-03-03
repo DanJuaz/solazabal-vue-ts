@@ -55,9 +55,8 @@ export default {
           console.log(response.data)
           localStorage.removeItem('token')
           localStorage.setItem('token', response.data.token);
-          console.log(`Succes:`,localStorage.getItem('token'))
+           localStorage.setItem('id', response.data.id);
           router.push({ name: 'home' })
-          console.log(router.push({ name: 'home' }));
         },
         (error) => {
           console.log(error)

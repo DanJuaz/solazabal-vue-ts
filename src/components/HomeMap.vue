@@ -6,62 +6,37 @@
     <font-awesome-icon icon="location" />
   </span>
   <div class="flex flex-row w-full">
-    <div id="mapContainer" class="w-[1000px] h-screen" />
-    <div class="w-1/3 h-full bg-gray-500">
-      <form
-        @submit.prevent="startJourney"
-        class="w-auto absolute top-4 left-20 z-[1000] flex flex-col sm:flex-col md:flex-col"
+    <div id="mapContainer" class="w-screen h-screen" />
+    <div class="z-[1000] absolute top-5 left-14">
+      <select
+        v-for="student in students_by_teacher"
+        :key="student.id"
+        class="w-auto bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
       >
-        <div>
-          <select
-            v-for="student in students_by_teacher"
-            :key="student.id"
-            class="w-auto bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-          >
-            <option>{{ student.name }}</option>
-          </select>
-        </div>
-        <button
-          type="submit"
-          @click="startJourney"
-          id="startJourney"
-          class="w-auto h-10 rounded-md px-0 py-1 mx-1 my-1 bg-green font-semibold"
-        >
-          Iniciar
-        </button>
-        <div v-if="showPauseButton">
-          <button @click="stopJourney">Detener</button>
-          <button class="rounded-md px-2 py-1 mx-1 my-1 bg-orange-500 font-semibold">
-            <font-awesome-icon icon="pause" />
-          </button>
-          <button
-            class="rounded-md px-2 py-1 mx-1 my-1 bg-orange-500 font-semibold"
-            @click="stopJourney"
-          >
-            Stop
-          </button>
-        </div>
-      </form>
-
-      <details class="rounded-md shadow-md p-4" v-for="type_foul in type_fouls" :key="type_foul.id">
-        <summary
-          class="cursor-pointer bg-gray-200 hover:bg-gray-300 py-2 px-4 rounded-md outline-none"
-        >
-          {{ type_foul.name }}
-        </summary>
-        <div
-          v-for="foul in type_foul.fouls"
-          :key="foul.id"
-          class="flex flex-col justify-center items-center mt-2"
-        >
-          <p
-            class="w-1/2 bg-blue-500 hover:bg-blue-700 text-white font-bold my-2 py-2 px-4 rounded"
-          >
-            {{ foul.name }}
-          </p>
-        </div>
-      </details>
+        <option>{{ student.name }}</option>
+      </select>
     </div>
+    <button
+      type="submit"
+      @click="startJourney"
+      id="startJourney"
+      class="z-[1000] absolute top-5 left-44  w-auto h-10 rounded-md px-6 py-2 mx-1 my-0 bg-green font-semibold"
+    >
+      Iniciar
+    </button>
+    <div v-if="showPauseButton">
+      <button @click="stopJourney">Detener</button>
+      <button class="rounded-md px-2 py-1 mx-1 my-1 bg-orange-500 font-semibold">
+        <font-awesome-icon icon="pause" />
+      </button>
+      <button
+        class="rounded-md px-2 py-1 mx-1 my-1 bg-orange-500 font-semibold"
+        @click="stopJourney"
+      >
+        Stop
+      </button>
+    </div>
+    <!-- <TypeFoultList/> -->
   </div>
 </template>
 
@@ -71,13 +46,15 @@ import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import router from '@/router'
 import axios from 'axios'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+
+import TypeFoultList from '@components/TypeFoultList.vue'
 
 export default defineComponent({
+  components: {
+    TypeFoultList
+  },
   data() {
     return {
-      type_fouls: [],
-
       students_by_teacher: [],
       teacher: {
         id: 3,
@@ -95,22 +72,10 @@ export default defineComponent({
     }
   },
   mounted() {
-    this.fetch_type_foul()
     this.fetch_students_by_teacher()
   },
   methods: {
     // Fetch
-    async fetch_type_foul() {
-      axios
-        .get('type_foul/')
-        .then((response) => {
-          this.type_fouls = response.data
-          //console.log(this.type_fouls)
-        })
-        .catch((error) => {
-          console.log(error)
-        })
-    },
     async fetch_students_by_teacher() {
       axios
         .get(`student/?format=json&teacher=${this.teacher.id}`)

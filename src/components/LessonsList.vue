@@ -3,7 +3,7 @@
   <div class="container mx-auto px-4 sm:px-8">
     <div class="py-8">
       <div>
-        <h2 class="text-2xl font-semibold leading-tight">Alumnos</h2>
+        <h2 class="text-2xl font-semibold leading-tight">Clases</h2>
       </div>
       <div class="my-2 flex sm:flex-row justify-between flex-col">
         <div class="flex flex-row items-center">
@@ -16,11 +16,11 @@
         </div>
         <router-link
           :to="{ name: 'create-student' }"
-          class="flex justify-self-end w-[fit-content] rounded-md px-4 py-2 my-2 bg-primary hover:bg-secondary font-semibold"
-          >+ Alumno</router-link
+          class="flex justify-self-end w-[fit-content] rounded-md px-4 py-2 my-2 bg-primary font-bold"
+          >+ Falta</router-link
         >
       </div>
-      <div class="-mx-4 sm:-mx-8 px-4 py-4 overflow-x-auto">
+      <div class="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
         <div class="inline-block min-w-full shadow rounded-lg overflow-hidden">
           <table class="min-w-full leading-normal">
             <thead>
@@ -31,7 +31,7 @@
                   Nombre
                 </th>
                 <th
-                  class="hidden md:flex md:mx-0 px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                  class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
                 >
                   Fecha de matriculación
                 </th>
@@ -43,7 +43,7 @@
                 <th
                   class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
                 >
-                  Practicas
+                  Examenes
                 </th>
               </tr>
             </thead>
@@ -59,23 +59,19 @@
                       <p class="text-gray-900 whitespace-no-wrap">
                         {{ student.name }} {{ student.surname }}
                       </p>
-                      <p class="hidden md:block text-gray-900 whitespace-no-wrap">
-                        {{ student.DNI }}
-                      </p>
+                      <p class="text-gray-900 whitespace-no-wrap">{{ student.DNI }}</p>
                     </div>
                   </div>
                 </td>
-                <td
-                  class="hidden md:flex md:mt-5 px-5 py-5 border-b border-gray-200 bg-white text-sm"
-                >
+                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                   <p class="text-gray-900 whitespace-no-wrap">{{ student.fecha_matriculacion }}</p>
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                  <p class="text-gray-900 whitespace-no-wrap">{{ student.town }}</p>
+                  <p class="text-gray-900 whitespace-no-wrap">{{ student.town.name }}</p>
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                   <p class="text-gray-900 whitespace-no-wrap">
-                    {{ count_practice }}
+                    {{ student.examination ? student.examination.id : 0 }}
                   </p>
                 </td>
               </tr>
@@ -125,8 +121,6 @@ export default {
       teacher: {
         id: localStorage.getItem('id')
       },
-      towns: [],
-      count_practice: 0,
       // Pagination
       pageSize: 5,
       currentPage: 0,
@@ -157,40 +151,12 @@ export default {
     }
   },
   methods: {
-    // Fetch
     async fetchStudents() {
       try {
         const response = await axios.get(`student/?teacher=${this.teacher.id}`)
         this.students = response.data
       } catch (error) {
         console.error('Error fetching students:', error)
-      }
-    },
-    async fetchStudentPractice(studentDNI) {
-      try {
-        const response = await axios.get(`examination/?student=${studentDNI}`)
-        this.count_practice = response.data.length
-      } catch (error) {
-        console.error('Error fetching student practice:', error)
-      }
-    },
-    async fetchTowns() {
-      try {
-        const townResponse = await axios.get(`town/`)
-        const towns = townResponse.data
-
-        // Map town IDs to town names
-        const townMap = {}
-        towns.forEach((town) => {
-          townMap[town.id] = town.name
-        })
-
-        // Update student town names
-        this.students.forEach((student) => {
-          student.town = townMap[student.town] || 'Unknown Town'
-        })
-      } catch (error) {
-        console.error('Error fetching towns:', error)
       }
     },
     nextPage() {
@@ -221,7 +187,6 @@ export default {
   },
   mounted() {
     this.fetchStudents()
-    this.fetchTowns()
   }
 }
 </script>
