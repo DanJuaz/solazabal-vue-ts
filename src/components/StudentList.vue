@@ -71,7 +71,7 @@
                   <p class="text-gray-900 whitespace-no-wrap">{{ student.fecha_matriculacion }}</p>
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                  <p class="text-gray-900 whitespace-no-wrap">{{ student.town }}</p>
+                  <p class="text-gray-900 whitespace-no-wrap">{{ student.town.name }}</p>
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                   <p class="text-gray-900 whitespace-no-wrap">
@@ -174,25 +174,6 @@ export default {
         console.error('Error fetching student practice:', error)
       }
     },
-    async fetchTowns() {
-      try {
-        const townResponse = await axios.get(`town/`)
-        const towns = townResponse.data
-
-        // Map town IDs to town names
-        const townMap = {}
-        towns.forEach((town) => {
-          townMap[town.id] = town.name
-        })
-
-        // Update student town names
-        this.students.forEach((student) => {
-          student.town = townMap[student.town] || 'Unknown Town'
-        })
-      } catch (error) {
-        console.error('Error fetching towns:', error)
-      }
-    },
     nextPage() {
       if (this.currentPage < this.filteredStudents.length / this.pageSize - 1) {
         const prevBtn = document.getElementById('prevBtn')
@@ -221,7 +202,6 @@ export default {
   },
   mounted() {
     this.fetchStudents()
-    this.fetchTowns()
   }
 }
 </script>

@@ -1,7 +1,10 @@
 <template>
-  <div v-if="deleteConfirm" class="absolute top-52 left-60 flex flex-col px-2 py-2 justify-center border-2 rounded-lg bg-gray-100">
-    <h3>¿Seguro que quieres eliminar a {{ update_form.name }}?</h3>
-    <div class="flex flex-row justify-center">
+  <div
+    v-if="deleteConfirm"
+    class="absolute top-1/5 left-1/5 md:left-[80vh] flex flex-col px-2 py-2 justify-center border-2 rounded-lg bg-gray-100"
+  >
+    <h3 class="text-sm md:text-base">¿Seguro que quieres eliminar a {{ update_form.name }}?</h3>
+    <div class="flex flex-row justify-center my-2">
       <button
         @click.prevent="delete_student(student.DNI)"
         type="submit"
@@ -37,11 +40,14 @@
           required
         />
       </label>
-      <label class="block text-gray-700 text-sm font-bold mb-2">
+      <label class="flex items-center text-gray-700 text-sm font-bold mb-2">
         Municipio:
-        <select class="bg-gray-100 font-medium rounded-md border-2">
-          <option v-for="town in towns" :key="town.id" :value="town.name">{{ town.name }}</option>
+        <select class="bg-gray-100 font-medium rounded-md border-2" v-model="update_form.town">
+          <option v-for="town in towns" :key="town.id" :value="town.id">{{ town.name }}</option>
         </select>
+        <router-link to="/create-towns">
+          <font-awesome-icon icon="plus" class="ml-2 text-primary text-lg font-extrabold" />
+        </router-link>
       </label>
     </div>
     <!--Nombre y Apellido-->
@@ -135,7 +141,7 @@ import axios from 'axios'
 export default {
   data() {
     return {
-      deleteConfirm: true,
+      deleteConfirm: false,
       update_form: {
         DNI: '',
         name: '',
@@ -168,7 +174,7 @@ export default {
           telephone: newStudentData.telephone,
           fecha_nacimiento: newStudentData.fecha_nacimiento,
           fecha_matriculacion: newStudentData.fecha_matriculacion,
-          town: newStudentData.town,
+          town: newStudentData.town ? newStudentData.town.id : null,
           teacher: parseInt(localStorage.getItem('id'))
         }
       },
@@ -182,6 +188,7 @@ export default {
         this.studentDNI = this.$route.params.id
         const response = await axios.get(`student/${this.studentDNI}/`)
         this.student = response.data
+        console.log(this.student)
       } catch (error) {
         console.error('Error fetching student:', error)
       }
@@ -198,7 +205,10 @@ export default {
     async delete_student(DNI) {
       try {
         const response = await axios.delete(`student/${DNI}/`)
-        console.log(response)
+        this.$notify({
+          title: 'Todo Ha salido bien!',
+          text: `${response.data.name} ha sido eliminado`
+        })
         this.$router.push({ name: 'students' })
       } catch (error) {
         console.error('Error deleting student:', error)
@@ -206,7 +216,6 @@ export default {
     },
     async update_student(DNI) {
       try {
-        console.log(this.update_form)
         const response = await axios.put(`student/${DNI}/`, this.update_form)
         this.$notify({
           title: 'Todo Ha salido bien!',

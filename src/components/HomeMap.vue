@@ -22,7 +22,7 @@
       id="startJourney"
       class="z-[1000] absolute top-5 left-44  w-auto h-10 rounded-md px-6 py-2 mx-1 my-0 bg-green font-semibold"
     >
-      Iniciar
+      <font-awesome-icon icon="location-arrow" class="mr-2 " />Iniciar
     </button>
     <div v-if="showPauseButton">
       <button @click="stopJourney">Detener</button>

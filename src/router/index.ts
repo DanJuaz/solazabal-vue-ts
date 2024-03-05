@@ -48,6 +48,14 @@ const router = createRouter({
       }
     },
     {
+      name: 'create-towns',
+      path: '/create-towns',
+      component: () => import('@views/CreateTownView.vue'),
+      meta: {
+        requiresAuth: true,
+      }
+    },
+    {
       path: '/lessons',
       name: 'lessons',
       // which is lazy-loaded when the route is visited.

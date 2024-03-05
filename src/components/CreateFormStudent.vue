@@ -7,16 +7,14 @@ export default {
       towns: [],
       studentForm: {
         img: '',
-        DNI: '',
-        name: '',
-        surname: '',
-        email: '',
-        telephone: '',
-        fecha_nacimiento: '',
-        fecha_matriculacion: '',
-        town: {
-          name: ''
-        },
+        DNI: '12345678D',
+        name: 'dwqdwq',
+        surname: 'dwqdwq',
+        email: 'ddwqdw@dwqdq.com',
+        telephone: '123654789',
+        fecha_nacimiento: '2023-01-01',
+        fecha_matriculacion: '2023-01-01',
+        town: 0,
         teacher: localStorage.getItem('id')
       }
     }
@@ -51,8 +49,12 @@ export default {
             'Content-Type': 'multipart/form-data'
           }
         })
-        router.push({ name: 'students' })
-        console.log(response)
+        this.$notify({
+          title: 'Todo Ha salido bien!',
+          text: `${response.data.name} ha sido creado`
+        })
+        this.$router.push({ name: 'students' })
+
       } catch (error) {
         console.error('Error creating student:', error)
         console.log(error.request)
@@ -84,9 +86,9 @@ export default {
       </label>
       <label class="block text-gray-700 text-sm font-bold mb-2">
         Municipio:
-        <select v-model="studentForm.town.name" class="bg-gray-100 font-medium rounded-md border-2">
+        <select v-model="studentForm.town" class="bg-gray-100 font-medium rounded-md border-2">
           <option value="">Select Town</option>
-          <option v-for="town in towns" :key="town.id" :value="town.name">{{ town.name }}</option>
+          <option v-for="town in towns" :key="town.id" :value="town.id">{{ town.name }}</option>
         </select>
       </label>
     </div>
