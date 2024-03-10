@@ -26,24 +26,28 @@
             <thead>
               <tr>
                 <th
-                  class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                  class="w-auto items-center px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-medium text-gray-600 uppercase tracking-wider"
                 >
                   Nombre
+                  <font-awesome-icon icon="caret-up" class="mx-2" />
                 </th>
                 <th
-                  class="hidden md:flex md:mx-0 px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                  class="w-auto items-center hidden md:flex md:mx-0 px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-medium text-gray-600 uppercase tracking-wider"
                 >
                   Fecha de matriculación
+                  <font-awesome-icon icon="caret-up" class="mx-2" />
                 </th>
                 <th
-                  class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                  class="w-auto items-center px-2 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-medium text-gray-600 uppercase tracking-wider"
                 >
                   Municipio
+                  <font-awesome-icon icon="caret-up" class="mx-0" />
                 </th>
                 <th
-                  class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                  class="px-4 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-medium text-gray-600 uppercase tracking-wider"
                 >
                   Practicas
+                  <font-awesome-icon icon="caret-up" class="mx-2" />
                 </th>
               </tr>
             </thead>

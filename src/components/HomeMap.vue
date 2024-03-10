@@ -6,8 +6,10 @@
     <font-awesome-icon icon="location" />
   </span>
   <div class="flex flex-row w-full">
+    <!--Map-->
     <div id="mapContainer" class="w-screen h-screen" />
-    <div class="z-[1000] absolute top-5 left-14">
+    <div class="z-[1000] absolute top-5 left-14 flex flex-col md:flex-row space-y-2">
+      <!--Students-->
       <select
         v-for="student in students_by_teacher"
         :key="student.id"
@@ -15,27 +17,32 @@
       >
         <option>{{ student.name }}</option>
       </select>
-    </div>
-    <button
-      type="submit"
-      @click="startJourney"
-      id="startJourney"
-      class="z-[1000] absolute top-5 left-44  w-auto h-10 rounded-md px-6 py-2 mx-1 my-0 bg-green font-semibold"
-    >
-      <font-awesome-icon icon="location-arrow" class="mr-2 " />Iniciar
-    </button>
-    <div v-if="showPauseButton">
-      <button @click="stopJourney">Detener</button>
-      <button class="rounded-md px-2 py-1 mx-1 my-1 bg-orange-500 font-semibold">
-        <font-awesome-icon icon="pause" />
-      </button>
-      <button
-        class="rounded-md px-2 py-1 mx-1 my-1 bg-orange-500 font-semibold"
-        @click="stopJourney"
+      <!--Type Practices-->
+      <select
+        class="w-32 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
       >
-        Stop
+        <option v-for="type_p in type_practices" :key="type_p.id">{{ type_p.name }}</option>
+      </select>
+      <!--Start Button-->
+      <button
+        type="submit"
+        @click="startJourney()"
+        id="startJourney"
+        class="z-[1000] w-auto h-10 rounded-md px-6 py-2 mx-1 my-0 bg-green font-semibold"
+      >
+        <font-awesome-icon icon="location-arrow" class="mr-2" />Iniciar
       </button>
+      <!--Pause Button-->
+      <div v-if="showPauseButton" class="space-x-1 space-y-1 text-black font-medium">
+        <button @click="pauseJourney()" class="rounded-md px-2 py-1 bg-orange-400">
+          <font-awesome-icon icon="pause" />
+        </button>
+        <button class="rounded-md px-2 py-1 bg-red-500 uppercase" @click="stopJourney()">
+          Stop
+        </button>
+      </div>
     </div>
+
     <!-- <TypeFoultList/> -->
   </div>
 </template>
@@ -55,6 +62,7 @@ export default defineComponent({
   },
   data() {
     return {
+      //Logic variables
       students_by_teacher: [],
       teacher: {
         id: 3,
@@ -68,11 +76,13 @@ export default defineComponent({
         teacher: null,
         student: null,
         faults: []
-      }
+      },
+
+      type_practices: []
     }
   },
   mounted() {
-    this.fetch_students_by_teacher()
+    this.fetch_students_by_teacher(), this.fetch_type_practices()
   },
   methods: {
     // Fetch
@@ -82,6 +92,17 @@ export default defineComponent({
         .then((response) => {
           this.students_by_teacher = response.data
           //console.log(this.students_by_teacher)
+        })
+        .catch((error) => {
+          console.log(error)
+        })
+    },
+    async fetch_type_practices() {
+      axios
+        .get('type_practice/')
+        .then((response) => {
+          this.type_practices = response.data
+          console.log(this.type_practices)
         })
         .catch((error) => {
           console.log(error)
@@ -111,10 +132,12 @@ export default defineComponent({
     let map = null
     let route = []
     let routerLayer
-    let showPauseButton = ref(false)
+
     let watchId
     let userMarker
     let userMarkerAround
+
+    const showPauseButton = ref(false)
 
     onMounted(() => {
       createMapLayer()
@@ -196,13 +219,13 @@ export default defineComponent({
           .request('screen')
           .then((wakeLockObj) => {
             //console.log('Bloqueo de pantalla activado')
-            showPauseButton.value = true
             try {
+              showPauseButton.value = true
               watchId = navigator.geolocation.watchPosition(
                 (position) => {
-                  const date = new Date()
+                  //const date = new Date()
                   const { latitude, longitude } = position.coords
-                  route.push([latitude, longitude], date)
+                  route.push([latitude, longitude])
 
                   // Update the marker position
                   userMarker.setLatLng([latitude, longitude])
@@ -231,24 +254,21 @@ export default defineComponent({
             console.error('Error al solicitar el bloqueo de pantalla: ', error)
           })
       } else {
-        console.warn('La API de bloqueo de pantalla no está disponible en este navegador.')
+        console.warn('Bloquear la pantalla.')
       }
     }
 
     const drawRoute = () => {
       if (route.length > 1) {
         if (!routerLayer) {
-          let routerLayer = L.polyline(route, { width: '5px', color: '#E1DFFF' }).addTo(map)
-        } else {
-          routerLayer.setLatLngs(route)
-        }
-        // Corrected variable name from routerLayer to routeLayer
-        if (routerLayer) {
+          routerLayer = L.polyline(route, { width: '5px', color: '#E1DFFF' }).addTo(map)
           routerLayer.setStyle({
             color: 'blue',
             weight: 5,
             opacity: 0.8
           })
+        } else {
+          routerLayer.setLatLngs(route)
         }
       }
     }
@@ -266,6 +286,18 @@ export default defineComponent({
         console.log(`Error al detener el seguimiento: ${error.message}`)
       }
     }
+    const pauseJourney = () => {
+      // Detener el seguimiento continuo
+      try {
+        navigator.geolocation.clearWatch(watchId)
+        if (routeLayer) {
+          map.removeLayer(routeLayer)
+          routeLayer = undefined
+        }
+      } catch (error) {
+        console.log(`Error al detener el seguimiento: ${error.message}`)
+      }
+    };
 
     const findLocation = () => {
       map.setView([userMarker._latlng.lat, userMarker._latlng.lng], 20, {
@@ -277,7 +309,9 @@ export default defineComponent({
     return {
       startJourney,
       stopJourney,
-      findLocation
+      pauseJourney,
+      findLocation,
+      showPauseButton
     }
   }
 })

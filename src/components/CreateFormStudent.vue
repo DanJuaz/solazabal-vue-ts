@@ -90,6 +90,9 @@ export default {
           <option value="">Select Town</option>
           <option v-for="town in towns" :key="town.id" :value="town.id">{{ town.name }}</option>
         </select>
+        <router-link to="/create-towns">
+          <font-awesome-icon icon="plus" class="ml-2 text-primary text-lg font-extrabold" />
+        </router-link>
       </label>
     </div>
     <!--Nombre y Apellido-->

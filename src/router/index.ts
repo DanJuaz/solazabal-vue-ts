@@ -65,6 +65,22 @@ const router = createRouter({
       }
     },
     {
+      name: 'create-foul',
+      path: '/create-foul',
+      component: () => import('@views/CreateFoulView.vue'),
+      meta: {
+        requiresAuth: true,
+      }
+    },
+    {
+      name: 'create-typefoul',
+      path: '/create-type-foul',
+      component: () => import('@views/CreateTypeFoulView.vue'), 
+      meta: {
+        requiresAuth: true,
+      },
+    },
+    {
       path: '/lessons/:id',
       name: 'lesson',
       // which is lazy-loaded when the route is visited.

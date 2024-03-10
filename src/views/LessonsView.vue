@@ -6,7 +6,7 @@ import LessonsList from '@components/LessonsList.vue'
   <header>
     <Navbar activeElement="Clases" />
   </header>
-  <main>
+  <main class="w-full h-screen flex justify-center items-center">
     <LessonsList />
   </main>
 </template>
