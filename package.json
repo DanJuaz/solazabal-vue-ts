@@ -17,11 +17,11 @@
     "@fortawesome/free-regular-svg-icons": "^6.5.1",
     "@fortawesome/free-solid-svg-icons": "^6.5.1",
     "@fortawesome/vue-fontawesome": "^3.0.6",
+    "@kyvg/vue3-notification": "^3.2.0",
     "axios": "^1.6.7",
     "leaflet": "^1.9.4",
     "pinia": "^2.1.7",
     "vue": "^3.4.15",
-    "vue-cookies": "^1.8.3",
     "vue-router": "^4.2.5"
   },
   "devDependencies": {

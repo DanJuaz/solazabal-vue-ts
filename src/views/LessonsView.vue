@@ -1,12 +1,12 @@
 <script setup>
 import Navbar from '@components/Navbar.vue'
-import LessonsTable from '@components/LessonsTable.vue'
+import LessonsList from '@components/LessonsList.vue'
 </script>
 <template>
   <header>
     <Navbar activeElement="Clases" />
   </header>
-  <main>
-    <LessonsTable />
+  <main class="w-full h-screen flex justify-center items-center">
+    <LessonsList />
   </main>
 </template>

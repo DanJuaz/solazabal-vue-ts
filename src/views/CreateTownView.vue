@@ -1,12 +1,13 @@
 <script setup>
+import CreateTownForm from '@components/CreateTownForm.vue'
 import Navbar from '@components/Navbar.vue'
-import Practice from '@components/PracticeResult.vue'
 </script>
+
 <template>
   <header>
     <Navbar />
   </header>
   <main class="w-full h-screen flex justify-center items-center">
-    <Practice />
+    <CreateTownForm />
   </main>
 </template>

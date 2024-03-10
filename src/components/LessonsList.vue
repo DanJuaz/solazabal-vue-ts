@@ -3,7 +3,7 @@
   <div class="container mx-auto px-4 sm:px-8">
     <div class="py-8">
       <div>
-        <h2 class="text-2xl font-semibold leading-tight">Alumnos</h2>
+        <h2 class="text-2xl font-semibold leading-tight">Clases</h2>
       </div>
       <div class="my-2 flex sm:flex-row justify-between flex-col">
         <div class="flex flex-row items-center">
@@ -15,71 +15,67 @@
           />
         </div>
         <router-link
-          :to="{ name: 'create-student' }"
-          class="flex justify-self-end w-[fit-content] rounded-md px-4 py-2 my-2 bg-primary hover:bg-secondary font-semibold"
-          >+ Alumno</router-link
+          :to="{ name: 'create-foul' }"
+          class="flex justify-self-end w-[fit-content] rounded-md px-4 py-2 my-2 bg-primary font-bold"
+          >+ Falta</router-link
         >
       </div>
-      <div class="-mx-4 sm:-mx-8 px-4 py-4 overflow-x-auto">
+      <div class="w-auto -mx-2  px-4  py-4 overflow-x-auto">
         <div class="inline-block min-w-full shadow rounded-lg overflow-hidden">
           <table class="min-w-full leading-normal">
             <thead>
               <tr>
                 <th
-                  class="w-auto items-center px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-medium text-gray-600 uppercase tracking-wider"
+                  class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
                 >
-                  Nombre
-                  <font-awesome-icon icon="caret-up" class="mx-2" />
+                  Alumno
                 </th>
                 <th
-                  class="w-auto items-center hidden md:flex md:mx-0 px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-medium text-gray-600 uppercase tracking-wider"
+                  class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
                 >
-                  Fecha de matriculación
-                  <font-awesome-icon icon="caret-up" class="mx-2" />
+                  Fecha
                 </th>
                 <th
-                  class="w-auto items-center px-2 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-medium text-gray-600 uppercase tracking-wider"
+                  class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
                 >
-                  Municipio
-                  <font-awesome-icon icon="caret-up" class="mx-0" />
+                  Hora
                 </th>
                 <th
-                  class="px-4 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-medium text-gray-600 uppercase tracking-wider"
+                  class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
                 >
-                  Practicas
-                  <font-awesome-icon icon="caret-up" class="mx-2" />
+                  Tipo de Practica
                 </th>
               </tr>
             </thead>
             <tbody>
               <tr
-                v-for="(student, index) in paginatedStudents"
-                :key="index"
-                v-on:click="showStudent(student.DNI)"
+                v-for="practice in paginatedPractices"
+                :key="practice.id"
+                v-on:click="showPractice(practice.id)"
               >
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                   <div class="flex items-center">
                     <div class="ml-3">
                       <p class="text-gray-900 whitespace-no-wrap">
-                        {{ student.name }} {{ student.surname }}
+                        {{ practice.student.name }}
                       </p>
                       <p class="hidden md:block text-gray-900 whitespace-no-wrap">
-                        {{ student.DNI }}
+                        {{ practice.student.surname }}
                       </p>
                     </div>
                   </div>
                 </td>
-                <td
-                  class="hidden md:flex md:mt-5 px-5 py-5 border-b border-gray-200 bg-white text-sm"
-                >
-                  <p class="text-gray-900 whitespace-no-wrap">{{ student.fecha_matriculacion }}</p>
-                </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                  <p class="text-gray-900 whitespace-no-wrap">{{ student.town.name }}</p>
+                  <p class="text-gray-900 whitespace-no-wrap">{{ practice.date }}</p>
                 </td>
                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                   <p class="text-gray-900 whitespace-no-wrap">
-                    {{ count_practice }}
+                    {{ practice.start_hour.substring(0, 5) }}-{{ practice.end_hour.substring(0, 5) }}
+                  </p>
+                </td>
+                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                  <p class="text-gray-900 whitespace-no-wrap">
+                    {{ practice.type_practice.name }}
                   </p>
                 </td>
               </tr>
@@ -129,27 +125,25 @@ export default {
       teacher: {
         id: localStorage.getItem('id')
       },
-      towns: [],
-      count_practice: 0,
       // Pagination
       pageSize: 5,
       currentPage: 0,
       searchQuery: '',
-      students: []
+      practices: []
     }
   },
   computed: {
     // Filtrar estudiantes basados en la consulta de búsqueda
-    filteredStudents() {
-      return this.students.filter((student) => {
-        return student.name.toLowerCase().includes(this.searchQuery.toLowerCase())
+    filteredPractices() {
+      return this.practices.filter((practice) => {
+        return practice.student.name.toLowerCase().includes(this.searchQuery.toLowerCase())
       })
     },
     // Estudiantes paginados basados en la página actual y el tamaño de la página
-    paginatedStudents() {
+    paginatedPractices() {
       const startIndex = this.currentPage * this.pageSize
       const endIndex = startIndex + this.pageSize - 1
-      return this.filteredStudents.slice(startIndex, endIndex + 1)
+      return this.filteredPractices.slice(startIndex, endIndex + 1)
     },
     // Índice de inicio de los estudiantes mostrados actualmente
     startIndex() {
@@ -157,29 +151,20 @@ export default {
     },
     // Índice final de los estudiantes mostrados actualmente
     endIndex() {
-      return Math.min((this.currentPage + 1) * this.pageSize - 1, this.filteredStudents.length - 1)
+      return Math.min((this.currentPage + 1) * this.pageSize - 1, this.filteredPractices.length - 1)
     }
   },
   methods: {
-    // Fetch
-    async fetchStudents() {
+    async fetchPractices() {
       try {
-        const response = await axios.get(`student/?teacher=${this.teacher.id}`)
-        this.students = response.data
+        const response = await axios.get(`practice/?teacher=${this.teacher.id}`)
+        this.practices = response.data
       } catch (error) {
-        console.error('Error fetching students:', error)
-      }
-    },
-    async fetchStudentPractice(studentDNI) {
-      try {
-        const response = await axios.get(`examination/?student=${studentDNI}`)
-        this.count_practice = response.data.length
-      } catch (error) {
-        console.error('Error fetching student practice:', error)
+        console.error('Error fetching practices:', error)
       }
     },
     nextPage() {
-      if (this.currentPage < this.filteredStudents.length / this.pageSize - 1) {
+      if (this.currentPage < this.filteredPractices.length / this.pageSize - 1) {
         const prevBtn = document.getElementById('prevBtn')
         prevBtn.disabled = false
         prevBtn.style = 'opacity: 1'
@@ -199,13 +184,14 @@ export default {
         prevBtn.style = 'opacity: 0.5'
       }
     },
-    showStudent(studentDNI) {
-      router.push({ name: 'student', params: { id: studentDNI } })
-      router.push({ name: 'student', params: { id: studentDNI } })
+    //
+    showPractice(id) {
+      router.push({ name: 'lesson', params: { id: id } })
+      router.push({ name: 'lesson', params: { id: id } })
     }
   },
   mounted() {
-    this.fetchStudents()
+    this.fetchPractices()
   }
 }
 </script>

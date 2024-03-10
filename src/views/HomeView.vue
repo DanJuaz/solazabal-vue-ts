@@ -7,7 +7,7 @@ import HomeMap from '@components/HomeMap.vue'
     <header class="">
       <Navbar activeElement="Conducir"/>
     </header>
-    <main class="w-screen h-screen flex flex-col justify-center items-center">
+    <main class="w-screen flex flex-col justify-center items-center">
       <HomeMap />
     </main>
   </div>

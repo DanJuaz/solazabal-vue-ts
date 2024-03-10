@@ -28,7 +28,7 @@ import LoginForm from '@components/LoginForm.vue';
     <button
       type="submit"
       @click.prevent="login()"
-      class="text-white bg-primary hover:bg-secondary focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+      class="flex justify-center text-center text-white bg-primary hover:bg-secondary focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
     >
       Iniciar Sesión
     </button>
@@ -36,7 +36,7 @@ import LoginForm from '@components/LoginForm.vue';
 </template>
 <script>
 import axios from 'axios'
-import router from '../router/index';
+import router from '../router/index'
 
 export default {
   data() {
@@ -49,16 +49,13 @@ export default {
   },
   methods: {
     login() {
-      console.log(this.loginForm)
       axios.post(`login/`, this.loginForm).then(
         (response) => {
-          $cookies.remove('token', 'csrftoken', 'remember_token')
-          // console.log(response.data)
-          $cookies.set('id', response.data.id)
-          $cookies.set('username', response.data.username)
-          $cookies.set('email', response.data.email)
-          $cookies.set('token', response.data.token);
-          router.push({ name: 'Home' })
+          localStorage.removeItem('token')
+          localStorage.setItem('token', response.data.token)
+          localStorage.setItem('id', response.data.id)
+          router.push({ name: 'home' })
+          router.push({ name: 'home' })
         },
         (error) => {
           console.log(error)
