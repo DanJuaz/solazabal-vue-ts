@@ -7,7 +7,7 @@ const isActive = (element) => element === props.activeElement;
 <template>
   <nav class="z-[10000] w-screen absolute bottom-0 left-0 right-0 flex flex-row justify-center bg-secondary">
     <a href="/home" class="flex flex-col justify-center items-center px-4 py-2 text-light hover:-translate-y-2 my-2 rounded-md">
-      <font-awesome-icon icon="road" class="text-light" />Conducir
+      <font-awesome-icon icon="car" class="text-light" />Conducir
       <span class="" :class="{ 'w-6 border-2 rounded-lg bg-light text-light': isActive('Conducir') }"></span>
     </a>
     <a href="/students" class="flex flex-col justify-center items-center px-4 py-2 text-light hover:-translate-y-2 my-2 rounded-md">
