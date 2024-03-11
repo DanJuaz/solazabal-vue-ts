@@ -33,7 +33,7 @@
       <button
         v-if="!showPauseButton"
         type="submit"
-        @click="startJourney()"
+        @click="startJourney(form_lesson)"
         id="startJourney"
         class="z-[1000] w-auto h-10 rounded-md px-6 py-2 mx-1 my-0 bg-green font-semibold"
       >
@@ -225,7 +225,7 @@ export default defineComponent({
     }
 
     // Show pause botton
-    const startJourney = () => {
+    const startJourney = (formLesson) => {
       // API Screen Wake Lock
       if ('wakeLock' in navigator) {
         navigator.wakeLock
@@ -241,6 +241,7 @@ export default defineComponent({
                   route.push([latitude, longitude])
                   // Notify user the start
                   if (route.length === 1) {
+                    formLesson.start_hour = getCurrentTime()
                     notify({
                       title: 'Inicio de la práctica',
                       message: 'La práctica ha comenzado',
@@ -294,14 +295,18 @@ export default defineComponent({
     }
 
     const stopJourney = (formLesson) => {
-      console.log('Stop Jouney', route)
       // Defined the initial and final marker
       initialMarker = L.marker(route[0]).addTo(map).addTo(map)
       finalMarker = L.marker(route[route.length - 1]).addTo(map)
+      setTimeout(function () {
+        initialMarker.remove()
+        finalMarker.remove()
+      }, 5000)
       finalMarker.style = {
         color: 'red'
       }
       // Detener el seguimiento continuo
+      formLesson.jorney_json = JSON.stringify(route)
       try {
         navigator.geolocation.clearWatch(watchId)
         route = []
@@ -309,7 +314,15 @@ export default defineComponent({
           map.removeLayer(routerLayer)
           routerLayer = undefined
         }
+        formLesson.end_hour = getCurrentTime()
         console.log(formLesson)
+        post_lesson(formLesson)
+        showPauseButton.value = false
+        notify({
+          title: 'Fin de la práctica',
+          message: 'La práctica ha finalizado',
+          type: 'success'
+        })
       } catch (error) {
         console.log(`Error al detener el seguimiento: ${error.message}`)
       }
@@ -333,6 +346,26 @@ export default defineComponent({
         duration: 0.1
       })
     }
+
+    const post_lesson = async (formLesson) => {
+      axios
+        .post('practice/', formLesson)
+        .then((response) => {
+          console.log(response)
+        })
+        .catch((error) => {
+          console.log(error)
+        })
+    }
+    function getCurrentTime() {
+      const now = new Date()
+      const hours = now.getHours().toString().padStart(2, '0')
+      const minutes = now.getMinutes().toString().padStart(2, '0')
+      const seconds = now.getSeconds().toString().padStart(2, '0')
+
+      return `${hours}:${minutes}:${seconds}`
+    }
+
     // Return the function to be used in the template
     return {
       startJourney,
