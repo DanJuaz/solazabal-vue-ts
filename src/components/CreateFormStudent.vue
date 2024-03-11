@@ -7,15 +7,15 @@ export default {
       towns: [],
       studentForm: {
         img: '',
-        DNI: '12345678D',
-        name: 'dwqdwq',
-        surname: 'dwqdwq',
-        email: 'ddwqdw@dwqdq.com',
-        telephone: '123654789',
-        fecha_nacimiento: '2023-01-01',
-        fecha_matriculacion: '2023-01-01',
+        DNI: '',
+        name: '',
+        surname: '',
+        email: '',
+        telephone: '',
+        fecha_nacimiento: '',
+        fecha_matriculacion: '',
         town: 0,
-        teacher: localStorage.getItem('id')
+        teacher: JSON.parse(localStorage.getItem('user')).id,
       }
     }
   },
