@@ -11,33 +11,43 @@
     <div class="z-[1000] absolute top-5 left-14 flex flex-col md:flex-row space-y-2">
       <!--Students-->
       <select
-        v-for="student in students_by_teacher"
-        :key="student.id"
+        v-model="form_lesson.student"
         class="w-auto bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
       >
-        <option>{{ student.name }}</option>
+        <option disabled selected>Estudiante</option>
+        <option v-for="student_l in students_by_teacher" :key="student_l.id" :value="student_l.DNI">
+          {{ student_l.name }}
+        </option>
       </select>
       <!--Type Practices-->
       <select
+        v-model="form_lesson.type_practice"
         class="w-32 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
       >
-        <option v-for="type_p in type_practices" :key="type_p.id">{{ type_p.name }}</option>
+        <option disabled selected>Tipo de Practica</option>
+        <option v-for="type_p in type_practices" :key="type_p.id" :value="type_p.id">
+          {{ type_p.name }}
+        </option>
       </select>
       <!--Start Button-->
       <button
+        v-if="!showPauseButton"
         type="submit"
-        @click="startJourney()"
+        @click="startJourney(form_lesson)"
         id="startJourney"
         class="z-[1000] w-auto h-10 rounded-md px-6 py-2 mx-1 my-0 bg-green font-semibold"
       >
         <font-awesome-icon icon="location-arrow" class="mr-2" />Iniciar
       </button>
       <!--Pause Button-->
-      <div v-if="showPauseButton" class="space-x-1 space-y-1 text-black font-medium">
+      <div
+        v-if="showPauseButton"
+        class="flex justify-around space-x-1 space-y-1 text-black font-medium"
+      >
         <button @click="pauseJourney()" class="rounded-md px-2 py-1 bg-orange-400">
           <font-awesome-icon icon="pause" />
         </button>
-        <button class="rounded-md px-2 py-1 bg-red-500 uppercase" @click="stopJourney()">
+        <button class="rounded-md px-2 py-1 bg-red-500 uppercase" @click="stopJourney(form_lesson)">
           Stop
         </button>
       </div>
@@ -53,6 +63,7 @@ import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import router from '@/router'
 import axios from 'axios'
+import { useNotification } from '@kyvg/vue3-notification'
 
 import TypeFoultList from '@components/TypeFoultList.vue'
 
@@ -64,18 +75,15 @@ export default defineComponent({
     return {
       //Logic variables
       students_by_teacher: [],
-      teacher: {
-        id: 3,
-        name: 'Ortzadar'
-      },
-
+      teacher: JSON.parse(localStorage.getItem('user')),
       form_lesson: {
         start_hour: null,
         end_hour: null,
         jorney_json: null,
-        teacher: null,
-        student: null,
-        faults: []
+        teacher: JSON.parse(localStorage.getItem('user')).id,
+        student: '',
+        faults: [],
+        type_practice: 0
       },
 
       type_practices: []
@@ -102,7 +110,6 @@ export default defineComponent({
         .get('type_practice/')
         .then((response) => {
           this.type_practices = response.data
-          console.log(this.type_practices)
         })
         .catch((error) => {
           console.log(error)
@@ -130,12 +137,18 @@ export default defineComponent({
   },
   setup() {
     let map = null
+    let watchId
+
     let route = []
     let routerLayer
 
-    let watchId
+    const { notify } = useNotification()
+
+    //Markers
     let userMarker
     let userMarkerAround
+    let initialMarker
+    let finalMarker
 
     const showPauseButton = ref(false)
 
@@ -212,7 +225,7 @@ export default defineComponent({
     }
 
     // Show pause botton
-    const startJourney = () => {
+    const startJourney = (formLesson) => {
       // API Screen Wake Lock
       if ('wakeLock' in navigator) {
         navigator.wakeLock
@@ -226,7 +239,15 @@ export default defineComponent({
                   //const date = new Date()
                   const { latitude, longitude } = position.coords
                   route.push([latitude, longitude])
-
+                  // Notify user the start
+                  if (route.length === 1) {
+                    formLesson.start_hour = getCurrentTime()
+                    notify({
+                      title: 'Inicio de la práctica',
+                      message: 'La práctica ha comenzado',
+                      type: 'success'
+                    })
+                  }
                   // Update the marker position
                   userMarker.setLatLng([latitude, longitude])
                   userMarkerAround.setLatLng([latitude, longitude])
@@ -273,15 +294,35 @@ export default defineComponent({
       }
     }
 
-    const stopJourney = () => {
+    const stopJourney = (formLesson) => {
+      // Defined the initial and final marker
+      initialMarker = L.marker(route[0]).addTo(map).addTo(map)
+      finalMarker = L.marker(route[route.length - 1]).addTo(map)
+      setTimeout(function () {
+        initialMarker.remove()
+        finalMarker.remove()
+      }, 5000)
+      finalMarker.style = {
+        color: 'red'
+      }
       // Detener el seguimiento continuo
+      formLesson.jorney_json = JSON.stringify(route)
       try {
         navigator.geolocation.clearWatch(watchId)
         route = []
-        if (routeLayer) {
-          map.removeLayer(routeLayer)
-          routeLayer = undefined
+        if (routerLayer) {
+          map.removeLayer(routerLayer)
+          routerLayer = undefined
         }
+        formLesson.end_hour = getCurrentTime()
+        console.log(formLesson)
+        post_lesson(formLesson)
+        showPauseButton.value = false
+        notify({
+          title: 'Fin de la práctica',
+          message: 'La práctica ha finalizado',
+          type: 'success'
+        })
       } catch (error) {
         console.log(`Error al detener el seguimiento: ${error.message}`)
       }
@@ -297,7 +338,7 @@ export default defineComponent({
       } catch (error) {
         console.log(`Error al detener el seguimiento: ${error.message}`)
       }
-    };
+    }
 
     const findLocation = () => {
       map.setView([userMarker._latlng.lat, userMarker._latlng.lng], 20, {
@@ -305,6 +346,26 @@ export default defineComponent({
         duration: 0.1
       })
     }
+
+    const post_lesson = async (formLesson) => {
+      axios
+        .post('practice/', formLesson)
+        .then((response) => {
+          console.log(response)
+        })
+        .catch((error) => {
+          console.log(error)
+        })
+    }
+    function getCurrentTime() {
+      const now = new Date()
+      const hours = now.getHours().toString().padStart(2, '0')
+      const minutes = now.getMinutes().toString().padStart(2, '0')
+      const seconds = now.getSeconds().toString().padStart(2, '0')
+
+      return `${hours}:${minutes}:${seconds}`
+    }
+
     // Return the function to be used in the template
     return {
       startJourney,
