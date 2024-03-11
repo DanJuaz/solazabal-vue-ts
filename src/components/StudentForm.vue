@@ -152,7 +152,7 @@ export default {
         fecha_nacimiento: '',
         fecha_matriculacion: '',
         town: '',
-        teacher: parseInt(localStorage.getItem('id'))
+        teacher: JSON.parse(localStorage.getItem('user')),
       },
       studentDNI: '',
       student: {},
@@ -175,7 +175,7 @@ export default {
           fecha_nacimiento: newStudentData.fecha_nacimiento,
           fecha_matriculacion: newStudentData.fecha_matriculacion,
           town: newStudentData.town ? newStudentData.town.id : null,
-          teacher: parseInt(localStorage.getItem('id'))
+          teacher: newStudentData.teacher.id
         }
       },
       deep: true
@@ -204,12 +204,12 @@ export default {
     },
     async delete_student(DNI) {
       try {
-        const response = await axios.delete(`student/${DNI}/`)
+        const response = await axios.delete(`student/${DNI}/`);
         this.$notify({
           title: 'Todo Ha salido bien!',
           text: `${response.data.name} ha sido eliminado`
-        })
-        this.$router.push({ name: 'students' })
+        });
+        this.$router.push({ name: 'students' });
       } catch (error) {
         console.error('Error deleting student:', error)
       }

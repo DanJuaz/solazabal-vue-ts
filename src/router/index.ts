@@ -97,9 +97,10 @@ router.beforeEach((to, from, next) => {
 
   // Obtén el token del almacenamiento local
   const token = localStorage.getItem('token');
+  const user = localStorage.getItem('user');
 
   // Verifica si el usuario está autenticado
-  const isLoggedIn = token !== null;
+  const isLoggedIn = token !== null && user !== null;
 
   // Verifica si la ruta requiere autenticación
   if (requiresAuth) {
