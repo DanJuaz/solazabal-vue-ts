@@ -122,9 +122,7 @@ import router from '@/router'
 export default {
   data() {
     return {
-      teacher: {
-        id: localStorage.getItem('id')
-      },
+      teacher: JSON.parse(localStorage.getItem('user')),
       // Pagination
       pageSize: 5,
       currentPage: 0,
