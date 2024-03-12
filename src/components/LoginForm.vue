@@ -59,7 +59,12 @@ export default {
           router.push({ name: 'home' })
         },
         (error) => {
-          console.log(error)
+          this.$notify({
+            title:`${error.response.data.error}`,
+            type: 'error',
+            position: 'top center',
+            width: '300'
+          });
         }
       )
     }
